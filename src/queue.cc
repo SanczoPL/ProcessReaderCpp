@@ -1,6 +1,6 @@
 #include "../include/queue.h"
 
-#define DEBUG
+//#define DEBUG
 
 static const std::string logEnd = "\x1b[0m";
 static const std::string logDebug = "\x1b[32m";

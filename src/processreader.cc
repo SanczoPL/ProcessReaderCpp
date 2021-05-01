@@ -1,7 +1,7 @@
 #include "../include/processreader.h"
 #include <QDir>
 
-#define DEBUG
+//#define DEBUG
 
 const std::string logError = "\x1b[31m";
 const std::string logEnd = "\x1b[0m";
@@ -28,7 +28,7 @@ bool ProcessReader::checkIsDigit(const std::string & input)
 void ProcessReader::readProcessIntoQueue()
 {
 	#ifdef DEBUG
-	std::cout<< logDebug << "DEBUG: readProcessIntoQueue(" << m_procDirInput << ")" << logEnd<< std::endl;
+	std::cout<< logDebug << "DEBUG: readProcessIntoQueue()" << logEnd<< std::endl;
 	#endif
 	QDir qDir(QString::fromStdString(m_procDirInput));
 	QStringList dirs = qDir.entryList(QStringList(), QDir::Dirs | QDir::NoDot | QDir::NoDotDot);
@@ -36,7 +36,6 @@ void ProcessReader::readProcessIntoQueue()
 	foreach (QString name, dirs)
 	{
 		std::string nameStd = name.toStdString();
-		std::cout<< logDebug << "DEBUG: dir:" << nameStd << "" << logEnd<< std::endl;
 		if (!checkIsDigit(nameStd)) 
 		{
 			continue;
