@@ -13,12 +13,13 @@ ProcessQueue::ProcessQueue()
 
 void ProcessQueue::push_back(int k, std::string name)
 {
-#ifdef DEBUG
+	#ifdef DEBUG
 	std::cout<< logDebug << "DEBUG: pushQueue(" << k << "," << name << ")" << logEnd << std::endl;
-#endif
+	#endif
 	struct QNode* temp = newNode(k, name);
 
-	if (this->rear == NULL) {
+	if (this->rear == NULL) 
+	{
 		this->front = this->rear = temp;
 		this->count++;
 		return;
@@ -49,7 +50,8 @@ void ProcessQueue::pop_front()
 	std::cout<< logDebug << "DEBUG: pop_front()" << logEnd << std::endl;
 	#endif
 
-	if (this->front == NULL) {
+	if (this->front == NULL) 
+	{
 		return;
 	}
 
@@ -77,13 +79,16 @@ void ProcessQueue::pop_front()
 bool ProcessQueue::printQueue()
 {
 	bool returnFlag = false;
-	if (!this->isEmpty()) {
+	if (!this->isEmpty()) 
+	{
 		returnFlag = true;
 		struct QNode* temp = this->front;
 
-		while (temp != NULL) {
+		while (temp != NULL) 
+		{
 			std::cout << temp->name << " " << temp->pid << logEnd << std::endl;
-			if (temp->next == NULL) {
+			if (temp->next == NULL)
+			{
 				break;
 			}
 			temp = temp->next;
@@ -152,7 +157,6 @@ ProcessQueue* ProcessQueue::findPidInQueue(int k)
 	return outQueue;
 }
 
-
 bool ProcessQueue::printNameFromQueue()
 {
 	#ifdef DEBUG
@@ -160,13 +164,16 @@ bool ProcessQueue::printNameFromQueue()
 	#endif
 
 	bool returnFlag{false};
-	if (!this->isEmpty()) {
+	if (!this->isEmpty())
+	{
 		returnFlag = true;
 		struct QNode* temp = this->front;
 
-		while (temp != NULL) {
+		while (temp != NULL)
+		{
 			std::cout << temp->name << std::endl;
-			if (temp->next == NULL) {
+			if (temp->next == NULL)
+			{
 				break;
 			}
 			temp = temp->next;

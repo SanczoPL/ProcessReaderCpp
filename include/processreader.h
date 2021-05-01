@@ -3,10 +3,6 @@
 
 #include "queue.h"
 
-#include <stdbool.h>
-#include <dirent.h>
-#include <ctype.h>
-#include <fcntl.h>
 
 #include <iostream>
 #include <fstream>
@@ -14,17 +10,19 @@
 class ProcessReader
 {
 public:
-	ProcessReader();
-	bool printProcess(std::string procDirInput);
-	bool showName(std::string& pid, std::string & procDirInput);
-	bool showPid(std::string & name, std::string & procDirInput);
+	ProcessReader(std::string & procDirInput);
 
+	bool printProcess();
+	bool showName(std::string& pid);
+	bool showPid(std::string & name);
+	static bool checkIsDigit(const std::string& input);
+	
 private:
-	bool checkIsDigit(const std::string& input);
-	void readProcessIntoQueue(std::string & procDirInput);
+	void readProcessIntoQueue();
 	void getPid(std::string & name, std::string & path);
 private:
 	ProcessQueue m_queue;
+	std::string m_procDirInput;
 };
 
 #endif // PROCESS_READER_H

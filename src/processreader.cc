@@ -8,30 +8,29 @@ const std::string logEnd = "\x1b[0m";
 const std::string logWarn = "\x1b[33m";
 const std::string logDebug = "\x1b[32m";
 
-ProcessReader::ProcessReader(){};
+ProcessReader::ProcessReader(std::string & procDirInput)
+:m_procDirInput(procDirInput)
+{};
 
-bool ProcessReader::printProcess(std::string procDirInput)
+bool ProcessReader::printProcess()
 {
-	readProcessIntoQueue(procDirInput);
-	m_queue.printQueue();
+	readProcessIntoQueue();
+	return m_queue.printQueue();
 }
 
-bool ProcessReader::checkIsDigit(const std::string& input)
+bool ProcessReader::checkIsDigit(const std::string & input)
 {
 	std::string::const_iterator it = input.begin();
 	while (it != input.end() && std::isdigit(*it)) ++it;
 	return !input.empty() && it == input.end();
 }
 
-void ProcessReader::readProcessIntoQueue(std::string & procDirInput)
+void ProcessReader::readProcessIntoQueue()
 {
-	std::string currentPath;
-
-	QDir qDir(QString::fromStdString(procDirInput));
-
-	qDir.setFilter(QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
-	qDir.setSorting(QDir::Name);
-
+	#ifdef DEBUG
+	std::cout<< logDebug << "DEBUG: readProcessIntoQueue(" << m_procDirInput << ")" << logEnd<< std::endl;
+	#endif
+	QDir qDir(QString::fromStdString(m_procDirInput));
 	QStringList dirs = qDir.entryList(QStringList(), QDir::Dirs | QDir::NoDot | QDir::NoDotDot);
 
 	foreach (QString name, dirs)
@@ -42,10 +41,9 @@ void ProcessReader::readProcessIntoQueue(std::string & procDirInput)
 		{
 			continue;
 		}
-		currentPath = procDirInput + "/" + nameStd + "/status";
-		int pid = name.toInt();
-
+		std::string currentPath = m_procDirInput + "/" + nameStd + "/status";
 		getPid(nameStd, currentPath);
+		int pid = name.toInt();
 		m_queue.push_back(pid, nameStd);
 	}
 	return;
@@ -66,32 +64,27 @@ void ProcessReader::getPid(std::string & name, std::string & path)
 	return;
 }
 
-bool ProcessReader::showName(std::string & pid, std::string & procDirInput)
+bool ProcessReader::showName(std::string & pid)
 {
 	#ifdef DEBUG
 	std::cout<< logDebug << "DEBUG: showName(" << pid << ")" << logEnd<< std::endl;
 	#endif
-
 	if (checkIsDigit(pid) == 0) {
 		std::cout<< logDebug << "DEBUG: shcheckIsDigit == 0 :( " << logEnd<< std::endl;
 		return false;
 	}
 	int pidInt = (QString::fromStdString(pid)).toInt();
-
-	ProcessReader::readProcessIntoQueue(procDirInput);
+	ProcessReader::readProcessIntoQueue();
 	ProcessQueue* findQ = m_queue.findPidInQueue(pidInt);
-	findQ->printNameFromQueue();
-
-
+	return findQ->printNameFromQueue();
 }
 
-bool ProcessReader::showPid(std::string & name, std::string & procDirInput)
+bool ProcessReader::showPid(std::string & name)
 {
 	#ifdef DEBUG
-	printf("%sDEBUG: showPid(%s, %s)\n%s", logDebug, name, procDirInput, logEnd);
+	std::cout<< logDebug << "DEBUG: showPid(" << name << ")" << logEnd<< std::endl;
 	#endif
-	ProcessReader::readProcessIntoQueue(procDirInput);
+	ProcessReader::readProcessIntoQueue();
 	ProcessQueue* findQ = m_queue.findNameInQueue(name);
-	findQ->printPidFromQueue();
-
+	return findQ->printPidFromQueue();
 }

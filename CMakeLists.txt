@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 
 project(processreader VERSION 0.0.1 DESCRIPTION "processreader" LANGUAGES CXX)
 
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/bin/142804")
+
+configure_file(gtest/test_proc_status.txt ${CMAKE_BINARY_DIR}/test_proc_status.txt)
+configure_file(gtest/test_proc_status.txt ${CMAKE_BINARY_DIR}/bin/142804/status)
+
 find_package(Qt5Core REQUIRED)
 
 enable_testing()
@@ -35,7 +41,9 @@ add_executable(g_test
 	${SRC} ${HEADERS}
 	gtest/gtest.cc 
 	gtest/gtest_queue.cc 
-	gtest/gtest_queue.h)
+	gtest/gtest_queue.h
+	gtest/gtest_processreader.cc 
+	gtest/gtest_processreader.h)
 
 add_executable(${PROJECT_NAME} ${SRC} ${HEADERS} ${SRC_MAIN})
 
