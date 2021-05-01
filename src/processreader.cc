@@ -12,15 +12,15 @@ ProcessReader::ProcessReader(){};
 
 bool ProcessReader::printProcess(std::string procDirInput)
 {
-    readProcessIntoQueue(procDirInput);
+	readProcessIntoQueue(procDirInput);
 	m_queue.printQueue();
 }
 
 bool ProcessReader::checkIsDigit(const std::string& input)
 {
-    std::string::const_iterator it = input.begin();
-    while (it != input.end() && std::isdigit(*it)) ++it;
-    return !input.empty() && it == input.end();
+	std::string::const_iterator it = input.begin();
+	while (it != input.end() && std::isdigit(*it)) ++it;
+	return !input.empty() && it == input.end();
 }
 
 void ProcessReader::readProcessIntoQueue(std::string & procDirInput)

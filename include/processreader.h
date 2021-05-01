@@ -14,17 +14,17 @@
 class ProcessReader
 {
 public:
-    ProcessReader();
-    bool printProcess(std::string procDirInput);
-    bool showName(std::string& pid, std::string & procDirInput);
-    bool showPid(std::string & name, std::string & procDirInput);
+	ProcessReader();
+	bool printProcess(std::string procDirInput);
+	bool showName(std::string& pid, std::string & procDirInput);
+	bool showPid(std::string & name, std::string & procDirInput);
 
 private:
-    bool checkIsDigit(const std::string& input);
-    void readProcessIntoQueue(std::string & procDirInput);
-    void getPid(std::string & name, std::string & path);
+	bool checkIsDigit(const std::string& input);
+	void readProcessIntoQueue(std::string & procDirInput);
+	void getPid(std::string & name, std::string & path);
 private:
-    ProcessQueue m_queue;
+	ProcessQueue m_queue;
 };
 
 #endif // PROCESS_READER_H
