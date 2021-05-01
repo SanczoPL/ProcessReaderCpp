@@ -1,186 +1,213 @@
 #include "../include/queue.h"
 
-//#define DEBUG
+#define DEBUG
 
-static const char* logEnd = "\x1b[0m";
-static const char* logDebug = "\x1b[32m";
+static const std::string logEnd = "\x1b[0m";
+static const std::string logDebug = "\x1b[32m";
 
-bool printQueue(struct Queue* q)
+ProcessQueue::ProcessQueue()
 {
-    bool returnFlag = false;
-    if (!isEmpty(q)) {
-        returnFlag = true;
-        struct QNode* temp = q->front;
-
-        while (temp != NULL) {
-            printf("%s %d\n", temp->name, temp->pid);
-            if (temp->next == NULL) {
-                break;
-            }
-            temp = temp->next;
-        }
-    }
-    return returnFlag;
+    this->front = this->rear = NULL;
+    this->count = 0;
 }
 
-bool printNameFromQueue(struct Queue* q)
+void ProcessQueue::push_back(int k, std::string name)
 {
-    bool returnFlag = false;
-    if (!isEmpty(q)) {
-        returnFlag = true;
-        struct QNode* temp = q->front;
+#ifdef DEBUG
+    std::cout<< logDebug << "DEBUG: pushQueue(" << k << "," << name << ")" << logEnd << std::endl;
+#endif
+    struct QNode* temp = newNode(k, name);
 
-        while (temp != NULL) {
-            printf("%s\n", temp->name);
-            if (temp->next == NULL) {
-                break;
-            }
-            temp = temp->next;
-        }
+    if (this->rear == NULL) {
+        this->front = this->rear = temp;
+        this->count++;
+        return;
     }
-    return returnFlag;
+
+    this->rear->next = temp;
+    this->rear = temp;
+    this->count++;
 }
 
-bool printPidFromQueue(struct Queue* q)
+bool ProcessQueue::isEmpty()
 {
-    bool returnFlag = false;
-    if (!isEmpty(q)) {
-        returnFlag = true;
-        struct QNode* temp = q->front;
-
-        while (temp != NULL) {
-            printf("%d\n", temp->pid);
-            if (temp->next == NULL) {
-                break;
-            }
-            temp = temp->next;
-        }
-    }
-    return returnFlag;
+    return (this->rear == NULL);
 }
 
-struct Queue* findPidInQueue(struct Queue* q, int k)
+struct QNode* ProcessQueue::newNode(int k, std::string name)
 {
-    struct Queue* outQueue = createQueue();
-
-    if (q->front == NULL) {
-        return outQueue;
-    }
-    struct QNode* temp = q->front;
-
-    while (temp != NULL) {
-        if (k == temp->pid) {
-            push_back(outQueue, temp->pid, temp->name);
-        }
-        if (temp->next == NULL) {
-            break;
-        }
-        temp = temp->next;
-    }
-    return outQueue;
-}
-
-struct Queue* findNameInQueue(struct Queue* q, char* name)
-{
-    struct Queue* outQueue = createQueue();
-
-    if (q->front == NULL) {
-        return outQueue;
-    }
-    struct QNode* temp = q->front;
-
-    while (temp != NULL) {
-        if (strcmp(name, temp->name) == 0) {
-            push_back(outQueue, temp->pid, temp->name);
-        }
-        if (temp->next == NULL) {
-            break;
-        }
-        temp = temp->next;
-    }
-
-    return outQueue;
-}
-
-struct QNode* newNode(int k, char* name)
-{
-    //struct QNode* temp = (struct QNode*)malloc(sizeof(struct QNode));
     struct QNode* temp = new struct QNode();
     temp->pid = k;
-    strcpy(temp->name, name);
+    temp->name = name;
     temp->next = NULL;
     return temp;
 }
 
-struct Queue* createQueue()
+void ProcessQueue::pop_front()
 {
-    //struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue));
-    struct Queue* q = new struct Queue();
-    q->front = q->rear = NULL;
-    q->count = 0;
-    return q;
-}
+    #ifdef DEBUG
+    std::cout<< logDebug << "DEBUG: pop_front()" << logEnd << std::endl;
+    #endif
 
-void push_back(struct Queue* q, int k, char* name)
-{
-#ifdef DEBUG
-    printf("%sDEBUG: pushQueue(%d,%s)\n%s", logDebug, k, name, logEnd);
-#endif
-    struct QNode* temp = newNode(k, name);
-
-    if (q->rear == NULL) {
-        q->front = q->rear = temp;
-        q->count++;
+    if (this->front == NULL) {
         return;
     }
 
-    q->rear->next = temp;
-    q->rear = temp;
-    q->count++;
-}
+    struct QNode* temp = this->front;
 
-bool isEmpty(struct Queue* q)
-{
-    return (q->rear == NULL);
-}
-
-void pop_front(struct Queue* q)
-{
-    if (q->front == NULL) {
-        return;
-    }
-
-    struct QNode* temp = q->front;
-
-    if (q->front->next == NULL) {
-        q->front = NULL;
-        q->count--;
-        q->rear = NULL;
+    if (this->front->next == NULL) 
+    {
+        this->front = NULL;
+        this->count--;
+        this->rear = NULL;
         delete(temp);
         return;
     }
 
-    q->front = q->front->next;
-    if (q->front == NULL) {
-        q->rear = NULL;
+    this->front = this->front->next;
+    if (this->front == NULL) 
+    {
+        this->rear = NULL;
     }
-    q->count--;
+    this->count--;
 
     delete(temp);
 }
 
-bool deleteQueue(struct Queue* q)
+bool ProcessQueue::printQueue()
 {
-#ifdef DEBUG
-    printf("%sDEBUG: deleteQueue()\n%s", logDebug, logEnd);
-#endif
+    bool returnFlag = false;
+    if (!this->isEmpty()) {
+        returnFlag = true;
+        struct QNode* temp = this->front;
 
-    while (q->front != NULL) {
-        pop_front(q);
+        while (temp != NULL) {
+            std::cout << temp->name << " " << temp->pid << logEnd << std::endl;
+            if (temp->next == NULL) {
+                break;
+            }
+            temp = temp->next;
+        }
+    }
+    return returnFlag;
+}
+
+ProcessQueue* ProcessQueue::findNameInQueue(std::string name)
+{
+    #ifdef DEBUG
+    std::cout<< logDebug << "DEBUG: pop_front(" << name << ")" << logEnd << std::endl;
+    #endif
+    ProcessQueue* outQueue = new ProcessQueue();
+
+    if (this->front == NULL) 
+    {
+        #ifdef DEBUG
+        std::cout<< logDebug << "DEBUG: queue is empty" << logEnd << std::endl;
+        #endif
+        return outQueue;
+    }
+    struct QNode* temp = this->front;
+    while (temp != NULL) 
+    {
+        if (name == temp->name) 
+        {
+            outQueue->push_back(temp->pid, temp->name);
+        }
+        if (temp->next == NULL) 
+        {
+            break;
+        }
+        temp = temp->next;
     }
 
-    if (q->rear == NULL && q->front == NULL) {
-        delete(q);
+    return outQueue;
+}
+
+
+ProcessQueue* ProcessQueue::findPidInQueue(int k)
+{
+    #ifdef DEBUG
+    std::cout<< logDebug << "DEBUG: findPidInQueue()" << logEnd << std::endl;
+    #endif
+    ProcessQueue* outQueue = new ProcessQueue();
+
+    if (this->front == NULL) 
+    {
+        return outQueue;
+    }
+    struct QNode* temp = this->front;
+
+    while (temp != NULL) 
+    {
+        if (k == temp->pid) 
+        {
+            outQueue->push_back(temp->pid, temp->name);
+        }
+        if (temp->next == NULL) 
+        {
+            break;
+        }
+        temp = temp->next;
+    }
+    return outQueue;
+}
+
+
+bool ProcessQueue::printNameFromQueue()
+{
+    #ifdef DEBUG
+    std::cout<< logDebug << "DEBUG: printNameFromQueue()" << logEnd << std::endl;
+    #endif
+
+    bool returnFlag{false};
+    if (!this->isEmpty()) {
+        returnFlag = true;
+        struct QNode* temp = this->front;
+
+        while (temp != NULL) {
+            std::cout << temp->name << std::endl;
+            if (temp->next == NULL) {
+                break;
+            }
+            temp = temp->next;
+        }
+    }
+    return returnFlag;
+}
+
+bool ProcessQueue::printPidFromQueue()
+{
+    #ifdef DEBUG
+    std::cout<< logDebug << "DEBUG: printPidFromQueue()" << logEnd << std::endl;
+    #endif
+    bool returnFlag = false;
+    if (!this->isEmpty()) {
+        returnFlag = true;
+        struct QNode* temp = this->front;
+
+        while (temp != NULL) {
+            std::cout << temp->pid << std::endl;
+            if (temp->next == NULL) {
+                break;
+            }
+            temp = temp->next;
+        }
+    }
+    return returnFlag;
+}
+
+bool ProcessQueue::deleteQueue()
+{
+#ifdef DEBUG
+    std::cout<< logDebug << "DEBUG: deleteQueue()" << logEnd << std::endl;
+#endif
+
+    while (this->front != NULL) 
+    {
+        pop_front();
+    }
+    if (this->rear == NULL && this->front == NULL) 
+    {
         return true;
     }
     return false;

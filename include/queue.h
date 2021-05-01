@@ -5,42 +5,38 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
+#include <string>
+#include <iostream>
 
-
-#define BUF_LEN	40
 
 struct QNode {
 	int pid;
-	char name[BUF_LEN];
+	std::string name;
 	struct QNode* next;
 };
 
-struct Queue {
+class ProcessQueue
+{
+public:
+	ProcessQueue();
+	int getCount(){return this->count;};
+	void push_back(int k, std::string name);
+	void pop_front();
+	bool isEmpty();
+	bool printQueue();
+	
+	ProcessQueue* findNameInQueue(std::string name);
+	ProcessQueue* findPidInQueue(int k);
+	bool printNameFromQueue();
+	bool printPidFromQueue();
+	bool deleteQueue();
+
+private:
+	struct QNode* newNode(int k, std::string name);
+
 	int count;
-	struct QNode *front, *rear;
+	struct QNode *front;
+	struct QNode *rear;
 };
-
-bool printQueue(struct Queue* q);
-
-bool printNameFromQueue(struct Queue* q);
-
-bool printPidFromQueue(struct Queue* q);
-
-struct Queue* findPidInQueue(struct Queue* q, int k);
-
-struct Queue* findNameInQueue(struct Queue* q, char * name);
-
-struct QNode* newNode(int k, char* name);
-  
-struct Queue* createQueue();
-
-void push_back(struct Queue* q, int k, char* name);
-  
-bool isEmpty(struct Queue* q);
-
-void pop_front(struct Queue* q);
-
-bool deleteQueue(struct Queue* q);
 
 #endif // QUEUE_H
