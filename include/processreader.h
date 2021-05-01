@@ -8,16 +8,23 @@
 #include <ctype.h>
 #include <fcntl.h>
 
-bool printProcess(const char* procDirInput);
+#include <iostream>
+#include <fstream>
 
-bool checkIsDigit(char input[]);
+class ProcessReader
+{
+public:
+    ProcessReader();
+    bool printProcess(std::string procDirInput);
+    bool showName(std::string& pid, std::string & procDirInput);
+    bool showPid(std::string & name, std::string & procDirInput);
 
-void readProcessIntoQueue(struct Queue* q, const char * procDirInput);
-
-void getPid(char* name, char* path);
-
-bool showName(char* pid, const char * procDirInput);
-
-bool showPid(char* name, const char * procDirInput);
+private:
+    bool checkIsDigit(const std::string& input);
+    void readProcessIntoQueue(std::string & procDirInput);
+    void getPid(std::string & name, std::string & path);
+private:
+    ProcessQueue m_queue;
+};
 
 #endif // PROCESS_READER_H

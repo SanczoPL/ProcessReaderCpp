@@ -1,123 +1,97 @@
 #include "../include/processreader.h"
+#include <QDir>
 
-//#define DEBUG
+#define DEBUG
 
-static const char* logError = "\x1b[31m";
-static const char* logEnd = "\x1b[0m";
-static const char* logWarn = "\x1b[33m";
-static const char* logDebug = "\x1b[32m";
+const std::string logError = "\x1b[31m";
+const std::string logEnd = "\x1b[0m";
+const std::string logWarn = "\x1b[33m";
+const std::string logDebug = "\x1b[32m";
 
+ProcessReader::ProcessReader(){};
 
-bool printProcess(const char* procDirInput)
+bool ProcessReader::printProcess(std::string procDirInput)
 {
-    struct Queue* q = createQueue();
-    readProcessIntoQueue(q, procDirInput);
-    bool returnFlag = printQueue(q);
-    deleteQueue(q);
-	return returnFlag;
+    readProcessIntoQueue(procDirInput);
+	m_queue.printQueue();
 }
 
-bool checkIsDigit(char input[])
+bool ProcessReader::checkIsDigit(const std::string& input)
 {
-    int i;
-    for (i = 0; i < strlen(input); i++) {
-        if (!isdigit(input[i])) {
-#ifdef DEBUG
-            printf("%sDEBUG: checkIsDigit(): char[%d]: is invalid\n%s", logWarn, i, logEnd);
-#endif
-            return false;
-        }
-    }
-#ifdef DEBUG
-    printf("%sDEBUG: checkIsDigit(): valid\n%s", logDebug, logEnd);
-#endif
-    return true;
+    std::string::const_iterator it = input.begin();
+    while (it != input.end() && std::isdigit(*it)) ++it;
+    return !input.empty() && it == input.end();
 }
 
-void readProcessIntoQueue(struct Queue* q, const char* procDirInput)
+void ProcessReader::readProcessIntoQueue(std::string & procDirInput)
 {
-    char *currentPath = new char[100]();
-    DIR* directory;
-    directory = opendir(procDirInput);
+	std::string currentPath;
 
-    if (directory == NULL) {
-        printf("%s\nERROR: unable to open %s for read\n\n%s", logError, procDirInput, logEnd);
-        delete(currentPath);
-        return;
-    }
-#ifdef DEBUG
-    printf("%sDEBUG: opened %s for read:\n%s", logDebug, procDirInput, logEnd);
-#endif
-    struct dirent* dir;
-	char* name = new char[100](); //(char*)malloc(sizeof(char) * 100);
-    char *dirnameBuffer;
-    while ((dir = readdir(directory)) != NULL) {
-        dirnameBuffer = dir->d_name;
-        if (!checkIsDigit(dirnameBuffer)) {
-            continue;
-        }
-        snprintf(currentPath, 100, "%s/%s/%s", procDirInput,  dirnameBuffer, "status");
-        int pid = strtol(dirnameBuffer, NULL, 10);
-        getPid(name, currentPath);
-        push_back(q, pid, name);
-    }
+	QDir qDir(QString::fromStdString(procDirInput));
 
-    free(directory);
-    free(dir);
-    delete(currentPath);
-    delete(name);
-    return;
+	qDir.setFilter(QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
+	qDir.setSorting(QDir::Name);
+
+	QStringList dirs = qDir.entryList(QStringList(), QDir::Dirs | QDir::NoDot | QDir::NoDotDot);
+
+	foreach (QString name, dirs)
+	{
+		std::string nameStd = name.toStdString();
+		std::cout<< logDebug << "DEBUG: dir:" << nameStd << "" << logEnd<< std::endl;
+		if (!checkIsDigit(nameStd)) 
+		{
+			continue;
+		}
+		currentPath = procDirInput + "/" + nameStd + "/status";
+		int pid = name.toInt();
+
+		getPid(nameStd, currentPath);
+		m_queue.push_back(pid, nameStd);
+	}
+	return;
 }
 
-void getPid(char* name, char* path)
+void ProcessReader::getPid(std::string & name, std::string & path)
 {
-#ifdef DEBUG
-    printf("%sDEBUG: getPid(%s)\n%s", logDebug, path, logEnd);
-#endif
-    char null[BUF_LEN];
-
-    FILE* file = fopen(path, "r");
-    if (!file) {
-        printf("%sERROR: cannot open %s for read\n%s", logError, path, logEnd);
-        snprintf(name, 100, "%s", "not_readed");
-        return;
-    }
-    fscanf(file, "%s ", null);
-    fscanf(file, "%s ", name);
-    fclose(file);
-    return;
+	#ifdef DEBUG
+	std::cout<< logDebug << "DEBUG: getPid(" << path << ")" << logEnd<< std::endl;
+	#endif
+	std::string line;
+	std::ifstream fs(path.c_str());
+	if (fs.is_open())
+	{
+		fs >> line >> name;
+		fs.close();
+	}
+	return;
 }
 
-bool showName(char* pid, const char* procDirInput)
+bool ProcessReader::showName(std::string & pid, std::string & procDirInput)
 {
-#ifdef DEBUG
-    printf("%sDEBUG: showName(%s)\n%s", logDebug, pid, logEnd);
-#endif
+	#ifdef DEBUG
+	std::cout<< logDebug << "DEBUG: showName(" << pid << ")" << logEnd<< std::endl;
+	#endif
 
-    if (checkIsDigit(pid) == 0) {
-        return false;
-    }
-    int pidInt = strtol(pid, NULL, 10);
+	if (checkIsDigit(pid) == 0) {
+		std::cout<< logDebug << "DEBUG: shcheckIsDigit == 0 :( " << logEnd<< std::endl;
+		return false;
+	}
+	int pidInt = (QString::fromStdString(pid)).toInt();
 
-    struct Queue* q = createQueue();
-    readProcessIntoQueue(q, procDirInput);
-	struct Queue* findQ = findPidInQueue(q, pidInt);
-	bool returnFlag = printNameFromQueue(findQ);
-	deleteQueue(findQ);
-    deleteQueue(q);
-    return returnFlag;
+	ProcessReader::readProcessIntoQueue(procDirInput);
+	ProcessQueue* findQ = m_queue.findPidInQueue(pidInt);
+	findQ->printNameFromQueue();
+
+
 }
 
-bool showPid(char* name, const char* procDirInput)
+bool ProcessReader::showPid(std::string & name, std::string & procDirInput)
 {
-#ifdef DEBUG
-    printf("%sDEBUG: showPid(%s, %s)\n%s", logDebug, name, procDirInput, logEnd);
-#endif
-    struct Queue* q = createQueue();
-    readProcessIntoQueue(q, procDirInput);
-	struct Queue* findQ = findNameInQueue(q, name);
-	bool returnFlag = printPidFromQueue(findQ);
-	deleteQueue(findQ);
-    deleteQueue(q);
-    return returnFlag;
+	#ifdef DEBUG
+	printf("%sDEBUG: showPid(%s, %s)\n%s", logDebug, name, procDirInput, logEnd);
+	#endif
+	ProcessReader::readProcessIntoQueue(procDirInput);
+	ProcessQueue* findQ = m_queue.findNameInQueue(name);
+	findQ->printPidFromQueue();
+
 }

@@ -6,11 +6,11 @@
 
 //#define DEBUG
 
-static const char* logError = "\x1b[31m";
-static const char* logEnd = "\x1b[0m";
-static const char* logWarn = "\x1b[33m";
-static const char* logDebug = "\x1b[32m";
-static const char* procDir = "/proc";
+const std::string logError = "\x1b[31m";
+const std::string logEnd = "\x1b[0m";
+const std::string logWarn = "\x1b[33m";
+const std::string logDebug = "\x1b[32m";
+std::string procDir = "/proc";
 
 int outputFile;
 int save_outputFile;
@@ -20,8 +20,8 @@ void usage(char* progName);
 void getOpt(int* argc,
     char* argv[],
     char* state,
-    char* input_param[],
-    char* file_name[]);
+    std::string & input_param,
+    std::string & file_name);
 
 void redirectStdout(char* name);
 
@@ -31,14 +31,13 @@ void showUsageAndExit(char* name);
 
 int main(int argc, char* argv[])
 {
-
-    char* input_param = NULL;
-    char* file_name = NULL;
+    std::string input_param;
+    std::string file_name;
     char state = -1;
     if (argc < 2) {
         showUsageAndExit(argv[0]);
     }
-    getOpt(&argc, argv, &state, &input_param, &file_name);
+    getOpt(&argc, argv, &state, input_param, file_name);
 
 #ifdef DEBUG
     printf("%sDEBUG: state:%d\n%s", logDebug, state, logEnd);
@@ -48,19 +47,22 @@ int main(int argc, char* argv[])
     if (!state) {
         showUsageAndExit(argv[0]);
     }
+    ProcessReader pr;
+
     switch (state) {
     case 1:
-        printProcess(procDir);
+        //printProcess(procDir);
+        pr.printProcess(procDir);
         break;
     case 2:
-        showName(input_param, procDir);
+        pr.showName(input_param, procDir);
         break;
     case 3:
-        showPid(input_param, procDir);
+        pr.showPid(input_param, procDir);
         break;
     }
 
-    if (file_name != NULL) {
+    if (file_name.size()) {
         stopRedirectStdout();
     }
 
@@ -81,8 +83,8 @@ void usage(char* progName)
 void getOpt(int* argc,
     char* argv[],
     char* state,
-    char* input_param[],
-    char* file_name[])
+    std::string & input_param,
+    std::string & file_name)
 {
     int opt = 0;
     while ((opt = getopt(*argc, argv, "au:n:f:")) != -1) {
@@ -101,18 +103,18 @@ void getOpt(int* argc,
             if (*state > 0) {
                 showUsageAndExit(argv[0]);
             }
-            *input_param = optarg;
+            input_param = optarg;
             *state = 2;
             break;
         case 'n':
             if (*state > 0) {
                 showUsageAndExit(argv[0]);
             }
-            *input_param = optarg;
+            input_param = optarg;
             *state = 3;
             break;
         case 'f':
-            *file_name = optarg;
+            file_name = optarg;
             redirectStdout(optarg);
             break;
         default:
