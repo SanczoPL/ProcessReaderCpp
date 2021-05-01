@@ -72,12 +72,12 @@ int main(int argc, char* argv[])
 void usage(char* progName)
 {
 	std::cout << progName << "[Options] [Optional]" << std::endl;
-	std::cout << "Options:\n" << std::endl;
-	std::cout << "\t-a        | show all process\n" << std::endl;
-	std::cout << "\t-u <pid>  | show <pid> process name\n" << std::endl;
-	std::cout << "\t-n <name> | show pid of process <name>\n" << std::endl;
-	std::cout << "Optional:\n" << std::endl;
-	std::cout << "\t-f <file> | save output to <file> \n" << std::endl;
+	std::cout << "Options:" << std::endl;
+	std::cout << "\t-a        | show all process" << std::endl;
+	std::cout << "\t-u <pid>  | show <pid> process name" << std::endl;
+	std::cout << "\t-n <name> | show pid of process <name>" << std::endl;
+	std::cout << "Optional:" << std::endl;
+	std::cout << "\t-f <file> | save output to <file>" << std::endl;
 }
 
 void getOpt(int* argc,
