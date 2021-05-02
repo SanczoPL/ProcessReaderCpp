@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 {
 	std::string input_param;
 	std::string file_name;
-	char state = -1;
+	char state = 0;
 	if (argc < 2) 
 	{
 		showUsageAndExit(argv[0]);
