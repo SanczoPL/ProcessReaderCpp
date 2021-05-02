@@ -1,4 +1,4 @@
-### ProcessReaderC:
+### ProcessReaderCpp:
     ./processreader [Options] [Optional]
     
     Options:
